@@ -13,13 +13,18 @@ sub new {
     shift;
     Consul->new(@_, req_cb => sub {
         my ($self, $method, $url, $headers, $content, $cb) = @_;
-        http_request($method, $url, body => $content, headers => $headers->as_hashref, sub {
-            my ($rdata, $rheaders) = @_;
-            my $rstatus = $rheaders->{Status};
-            my $rreason = $rheaders->{Reason};
-            delete $rheaders->{$_} for grep { m/^[A-Z]/ } keys %$rheaders;
-            $cb->($rstatus, $rreason, Hash::MultiValue->from_mixed($rheaders), $rdata);
-        });
+        http_request($method, $url,
+            body => $content,
+            headers => $headers->as_hashref,
+            timeout => $self->timeout,
+            sub {
+                my ($rdata, $rheaders) = @_;
+                my $rstatus = $rheaders->{Status};
+                my $rreason = $rheaders->{Reason};
+                delete $rheaders->{$_} for grep { m/^[A-Z]/ } keys %$rheaders;
+                $cb->($rstatus, $rreason, Hash::MultiValue->from_mixed($rheaders), $rdata);
+            },
+        );
         return;
     });
 }
