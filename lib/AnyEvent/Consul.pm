@@ -11,7 +11,7 @@ use Hash::MultiValue;
 
 sub new {
     shift;
-    Consul->new(@_, req_cb => sub {
+    Consul->new(@_, request_cb => sub {
         my ($self, $method, $url, $headers, $content, $cb) = @_;
         http_request($method, $url,
             body => $content,
