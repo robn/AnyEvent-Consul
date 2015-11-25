@@ -1,4 +1,6 @@
 {{$NEXT}}
+
+0.004     2015-11-25 20:03:16+11:00 Australia/Melbourne
  - Use request/response object internally (Consul 0.012)
  - Add on_error argument for error callback
 
