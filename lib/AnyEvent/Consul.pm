@@ -12,17 +12,23 @@ use Hash::MultiValue;
 sub new {
     shift;
     Consul->new(@_, request_cb => sub {
-        my ($self, $method, $url, $headers, $content, $cb) = @_;
-        http_request($method, $url,
-            body => $content,
-            headers => $headers->as_hashref,
+        my ($self, $req) = @_;
+        http_request($req->method, $req->url,
+            body => $req->content,
+            headers => $req->headers->as_hashref,
             timeout => $self->timeout,
             sub {
                 my ($rdata, $rheaders) = @_;
-                my $rstatus = $rheaders->{Status};
-                my $rreason = $rheaders->{Reason};
+                my $rstatus = delete $rheaders->{Status};
+                my $rreason = delete $rheaders->{Reason};
                 delete $rheaders->{$_} for grep { m/^[A-Z]/ } keys %$rheaders;
-                $cb->($rstatus, $rreason, Hash::MultiValue->from_mixed($rheaders), $rdata);
+                $req->callback->(Consul::Response->new(
+                    status  => $rstatus,
+                    reason  => $rreason,
+                    headers => Hash::MultiValue->from_mixed($rheaders),
+                    content => $rdata,
+                    request => $req,
+                ));
             },
         );
         return;
