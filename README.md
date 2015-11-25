@@ -38,6 +38,11 @@ documentation for that module for details. The important difference is that you
 must pass the `cb` option to the endpoint methods to enable their asynchronous
 mode.
 
+There's also a `on_error` argument. If you pass in a coderef for this
+argument, it will be called with a single string arg whenever something goes
+wrong internally (usually a HTTP failure). Use it to safely log or cleanup
+after the error.
+
 # SUPPORT
 
 ## Bugs / Feature Requests

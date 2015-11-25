@@ -8,31 +8,40 @@ use strict;
 use Consul;
 use AnyEvent::HTTP qw(http_request);
 use Hash::MultiValue;
+use Carp qw(croak);
 
 sub new {
     shift;
-    Consul->new(@_, request_cb => sub {
-        my ($self, $req) = @_;
-        http_request($req->method, $req->url,
-            body => $req->content,
-            headers => $req->headers->as_hashref,
-            timeout => $self->timeout,
-            sub {
-                my ($rdata, $rheaders) = @_;
-                my $rstatus = delete $rheaders->{Status};
-                my $rreason = delete $rheaders->{Reason};
-                delete $rheaders->{$_} for grep { m/^[A-Z]/ } keys %$rheaders;
-                $req->callback->(Consul::Response->new(
-                    status  => $rstatus,
-                    reason  => $rreason,
-                    headers => Hash::MultiValue->from_mixed($rheaders),
-                    content => $rdata,
-                    request => $req,
-                ));
-            },
-        );
-        return;
-    });
+    Consul->new(@_,
+        request_cb => sub {
+            my ($self, $req) = @_;
+            http_request($req->method, $req->url,
+                body => $req->content,
+                headers => $req->headers->as_hashref,
+                timeout => $self->timeout,
+                sub {
+                    my ($rdata, $rheaders) = @_;
+                    my $rstatus = delete $rheaders->{Status};
+                    my $rreason = delete $rheaders->{Reason};
+                    delete $rheaders->{$_} for grep { m/^[A-Z]/ } keys %$rheaders;
+                    $req->callback->(Consul::Response->new(
+                        status  => $rstatus,
+                        reason  => $rreason,
+                        headers => Hash::MultiValue->from_mixed($rheaders),
+                        content => defined $rdata ? $rdata : "",
+                        request => $req,
+                    ));
+                },
+            );
+            return;
+        },
+        error_cb => sub {
+            my ($msg, $resp) = @_;
+            my $on_error = $resp->request->args->{on_error};
+            return $on_error->($msg) if ref $on_error eq 'CODE';
+            croak $msg;
+        },
+    );
 }
 
 sub acl     { shift->new(@_)->acl     }
@@ -89,6 +98,11 @@ It takes the same arguments and methods as L<Consul> itself, so see the
 documentation for that module for details. The important difference is that you
 must pass the C<cb> option to the endpoint methods to enable their asynchronous
 mode.
+
+There's also a C<on_error> argument. If you pass in a coderef for this
+argument, it will be called with a single string arg whenever something goes
+wrong internally (usually a HTTP failure). Use it to safely log or cleanup
+after the error.
 
 =head1 SUPPORT
 
