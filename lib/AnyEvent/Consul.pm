@@ -59,6 +59,8 @@ sub status  { shift->new(@_)->status  }
 
 =encoding UTF-8
 
+=for markdown [![Build Status](https://secure.travis-ci.org/robn/AnyEvent-Consul.png)](http://travis-ci.org/robn/AnyEvent-Consul)
+
 =head1 NAME
 
 AnyEvent::Consul - Make async calls to Consul via AnyEvent
