@@ -5,7 +5,7 @@ package AnyEvent::Consul;
 use warnings;
 use strict;
 
-use Consul;
+use Consul 0.016;
 use AnyEvent::HTTP qw(http_request);
 use Hash::MultiValue;
 use Carp qw(croak);
@@ -34,12 +34,6 @@ sub new {
                 },
             );
             return;
-        },
-        error_cb => sub {
-            my ($msg, $resp) = @_;
-            my $on_error = $resp->request->args->{on_error};
-            return $on_error->($msg) if ref $on_error eq 'CODE';
-            croak $msg;
         },
     );
 }

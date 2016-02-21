@@ -1,5 +1,6 @@
 {{$NEXT}}
 - Update for Test-Consul 0.003 (consul 0.6.3)
+- Use Consul error callback by default (Consul 0.016)
 
 0.004     2015-11-25 20:03:16+11:00 Australia/Melbourne
  - Use request/response object internally (Consul 0.012)
