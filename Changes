@@ -1,4 +1,6 @@
 {{$NEXT}}
+
+0.005     2016-02-22 08:45:10+11:00 Australia/Melbourne
 - Update for Test-Consul 0.003 (consul 0.6.3)
 - Use Consul error callback by default (Consul 0.016)
 
